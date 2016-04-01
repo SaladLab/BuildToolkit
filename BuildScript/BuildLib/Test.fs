@@ -15,7 +15,7 @@ module Test =
         ensureDirectory testDir
         solution.Projects
         |> List.map 
-               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (project.Name + ".Tests.dll"))
+               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
         |> List.filter (fun path -> File.Exists(path))
         |> xUnit2 (fun p ->
                { p with ToolPath = "./packages/_/xunit.runner.console/tools/xunit.console.exe"
@@ -28,7 +28,7 @@ module Test =
         ensureDirectory testDir
         solution.Projects
         |> List.map 
-               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (project.Name + ".Tests.dll"))
+               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
         |> List.filter (fun path -> File.Exists(path))
         |> String.concat " "
         |> (fun dlls -> 
