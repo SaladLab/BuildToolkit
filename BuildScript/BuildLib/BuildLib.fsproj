@@ -55,11 +55,13 @@
     <Compile Include="Project.fs" />
     <Compile Include="Solution.fs" />
     <Compile Include="Settings.fs" />
+    <Compile Include="Tool.fs" />
     <Compile Include="Build.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Nuget.fs" />
     <Compile Include="Help.fs" />
     <Content Include="packages.config" />
+    <None Include="BuildLib.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FakeLib">
