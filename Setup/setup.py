@@ -97,7 +97,7 @@ def license():
         for filename in fnmatch.filter(filenames, 'LICENSE'):
             path = os.path.join(root, filename)
             print path
-            open_replace_save(path, lambda x: re.sub(r"Copyright (c) .*", "Copyright (c) 2016 SaladLab", x))
+            open_replace_save(path, lambda x: re.sub(r"Copyright \(c\) .*", "Copyright (c) 2016 SaladLab", x))
             
         for filename in fnmatch.filter(filenames, 'AssemblyInfo.cs'):
             path = os.path.join(root, filename)
