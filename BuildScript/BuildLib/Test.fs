@@ -21,62 +21,71 @@ module Test =
     let coverityExe = lazy ("C:/CoverityScan/win64/bin/cov-build.exe") // TODO: install coverity scan if absent
     let coverityPublishExe  = lazy ((getNugetPackage "PublishCoverity" "0.11.0") @@ "tools" @@ "PublishCoverity.exe")
 
-    let getTestProjects solution =
-        // Project("{~}") = "Name", "Path.csproj", "{~}"
-        [ "TODO" ]
+    // project DLL list whose path looks like '*.Tests.' in solution
+    let getTestProjectDllsInSolution solution =
+        getProjectsInSolution solution
+        |> Seq.map (fun i -> let _, p = i in p)
+        |> Seq.where (fun p -> p.Contains ".Tests.")
+        |> Seq.map (fun p -> Path.GetDirectoryName(p) @@ "bin" @@ solution.Configuration @@ Path.GetFileNameWithoutExtension(p) + ".dll")
+        |> List.ofSeq 
 
-    // test with xunit2 and publish result to appveyor
+    // test and publish result to appveyor
     let testSolution solution = 
         ensureDirectory testDir
-        solution.Projects
-        |> List.map 
-               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
-        |> List.filter (fun path -> File.Exists(path))
-        |> xUnit2 (fun p ->
-               { p with ToolPath = xunitRunnerExe.Force()
-                        ShadowCopy = false
-                        XmlOutputPath = Some(testDir @@ "test.xml") })
-        if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then UploadTestResultsFile Xunit (testDir @@ "test.xml")
-
-    // test with NUnit3 and publish result to appveyor
-    let testSolutionWithNUnit3 solution = 
-        ensureDirectory testDir
-        solution.Projects
-        |> List.map 
-               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
-        |> List.filter (fun path -> File.Exists(path))
-        |> Fake.Testing.NUnit3.NUnit3 (fun p ->
-               { p with ToolPath = nunitRunnerExe.Force()
-                        ShadowCopy = false
-                        ResultSpecs = [ testDir @@ "test.xml" ] })
-        if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then UploadTestResultsFile Xunit (testDir @@ "test.xml")
+        let testDlls = getTestProjectDllsInSolution solution
+        if List.length testDlls = 0 then ()
+        else (
+            let ppath = Path.GetDirectoryName(List.head testDlls)
+            if File.Exists(ppath @@ "xunit.core.dll") then (
+                Fake.Testing.XUnit2.xUnit2 (fun p ->
+                       { p with ToolPath = xunitRunnerExe.Force()
+                                ShadowCopy = false
+                                XmlOutputPath = Some(testDir @@ "test.xml") }) testDlls
+                if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then UploadTestResultsFile Xunit (testDir @@ "test.xml")
+            )
+            elif File.Exists(ppath @@ "nunit.framework.dll") then (
+                Fake.Testing.NUnit3.NUnit3 (fun p ->
+                       { p with ToolPath = nunitRunnerExe.Force()
+                                ShadowCopy = false
+                                ResultSpecs = [ testDir @@ "test.xml" ] }) testDlls
+                if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then UploadTestResultsFile NUnit3 (testDir @@ "test.xml")
+            )
+            else (
+                failwithf "Failed to test project because test framework cannot be determined."
+            )
+        )
 
     // test with opencover and publish result to coveralls.io
     let coverSolutionWithParams setParams solution = 
         ensureDirectory testDir
-        solution.Projects
-        |> List.map 
-               (fun project -> 
-               (project.Folder + ".Tests") 
-               @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
-        |> List.filter (fun path -> File.Exists(path))
-        |> String.concat " "
-        |> (fun dlls ->
-            OpenCover (fun p ->
-                setParams { p with ExePath = openCoverExe.Force()
-                                   TestRunnerExePath = xunitRunnerExe.Force()
-                                   Output = testDir @@ "coverage.xml"
-                                   Register = RegisterUser
-                                   Filter = "+[*]* -[*.Tests]* -[xunit*]*" }) (dlls + " -noshadow"))
-        if getBuildParam "coverallskey" <> "" then 
-            // disable printing args to keep coverallskey secret
-            ProcessHelper.enableProcessTracing <- false
-            let result = 
-                ExecProcess (fun info -> 
-                    info.FileName <- coverallsExe.Force()
-                    info.Arguments <- testDir @@ "coverage.xml" + " -r " + (getBuildParam "coverallskey")) TimeSpan.MaxValue
-            if result <> 0 then failwithf "Failed to upload coverage data to coveralls.io"
-            ProcessHelper.enableProcessTracing <- true
+        let testDlls = getTestProjectDllsInSolution solution
+        tracefn "%A" testDlls
+        if List.length testDlls = 0 then ()
+        else (
+            let ppath = Path.GetDirectoryName(List.head testDlls)
+            let testRunnerExePath, testArgs = 
+                if File.Exists(ppath @@ "xunit.core.dll") then (xunitRunnerExe.Force(), "-noshadow")
+                elif File.Exists(ppath @@ "nunit.framework.dll") then (nunitRunnerExe.Force(), "/noshadow")
+                else failwithf "Failed to test project because test framework cannot be determined."
+            testDlls
+            |> String.concat " "
+            |> (fun dlls ->
+                OpenCover (fun p ->
+                    setParams { p with ExePath = openCoverExe.Force()
+                                       TestRunnerExePath = testRunnerExePath
+                                       Output = testDir @@ "coverage.xml"
+                                       Register = RegisterUser
+                                       Filter = "+[*]* -[*.Tests]* -[xunit*]*" }) (dlls + " " + testArgs))
+            if getBuildParam "coverallskey" <> "" then 
+                // disable printing args to keep coverallskey secret
+                ProcessHelper.enableProcessTracing <- false
+                let result = 
+                    ExecProcess (fun info -> 
+                        info.FileName <- coverallsExe.Force()
+                        info.Arguments <- testDir @@ "coverage.xml" + " -r " + (getBuildParam "coverallskey")) TimeSpan.MaxValue
+                if result <> 0 then failwithf "Failed to upload coverage data to coveralls.io"
+                ProcessHelper.enableProcessTracing <- true
+        )
 
     // test with opencover and publish result to coveralls.io
     let coverSolution solution = 
