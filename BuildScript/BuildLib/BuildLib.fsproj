@@ -51,6 +51,8 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
+    <Content Include="packages.config" />
+    <None Include="BuildLib.nuspec" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Project.fs" />
     <Compile Include="Solution.fs" />
@@ -59,9 +61,8 @@
     <Compile Include="Build.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Nuget.fs" />
+    <Compile Include="Unity.fs" />
     <Compile Include="Help.fs" />
-    <Content Include="packages.config" />
-    <None Include="BuildLib.nuspec" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FakeLib">
