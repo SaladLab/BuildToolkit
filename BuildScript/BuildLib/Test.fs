@@ -1,5 +1,7 @@
 namespace BuildLib
 
+open Fake.OpenCoverHelper
+
 [<AutoOpen>]
 module Test =
 
@@ -31,20 +33,22 @@ module Test =
         if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then UploadTestResultsFile Xunit (testDir @@ "test.xml")
 
     // test with opencover and publish result to coveralls.io
-    let coverSolution solution = 
+    let coverSolutionWithParams setParams solution = 
         ensureDirectory testDir
         solution.Projects
         |> List.map 
-               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
+               (fun project -> 
+               (project.Folder + ".Tests") 
+               @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
         |> List.filter (fun path -> File.Exists(path))
         |> String.concat " "
-        |> (fun dlls -> 
-        OpenCover (fun p -> 
-            { p with ExePath = openCoverExe.Force()
-                     TestRunnerExePath = xunitRunnerExe.Force()
-                     Output = testDir @@ "coverage.xml"
-                     Register = RegisterUser
-                     Filter = "+[*]* -[*.Tests]* -[xunit*]*" }) (dlls + " -noshadow"))
+        |> (fun dlls ->
+            OpenCover (fun p ->
+                setParams { p with ExePath = openCoverExe.Force()
+                                   TestRunnerExePath = xunitRunnerExe.Force()
+                                   Output = testDir @@ "coverage.xml"
+                                   Register = RegisterUser
+                                   Filter = "+[*]* -[*.Tests]* -[xunit*]*" }) (dlls + " -noshadow"))
         if getBuildParam "coverallskey" <> "" then 
             // disable printing args to keep coverallskey secret
             ProcessHelper.enableProcessTracing <- false
@@ -54,6 +58,10 @@ module Test =
                     info.Arguments <- testDir @@ "coverage.xml" + " -r " + (getBuildParam "coverallskey")) TimeSpan.MaxValue
             if result <> 0 then failwithf "Failed to upload coverage data to coveralls.io"
             ProcessHelper.enableProcessTracing <- true
+
+    // test with opencover and publish result to coveralls.io
+    let coverSolution solution = 
+        coverSolutionWithParams id solution
 
     let coveritySolution solution projectId =
         // info
