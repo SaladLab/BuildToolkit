@@ -7,6 +7,7 @@ module Test =
 
     open System
     open System.IO
+    open System.Text.RegularExpressions
     open Fake
     open Fake.Testing.XUnit2
     open Fake.Testing.NUnit3
@@ -15,7 +16,7 @@ module Test =
 
     // tools
     let xunitRunnerExe = lazy ((getNugetPackage "xunit.runner.console" "2.1.0") @@ "tools" @@ "xunit.console.exe")
-    let nunitRunnerExe = lazy ((getNugetPackage "NUnit.Runners" "3.2.0") @@ "tools" @@ "nunit3-console.exe")
+    let nunitRunnerExe = lazy ((getNugetPackage "NUnit.ConsoleRunner" "3.2.0") @@ "tools" @@ "nunit3-console.exe")
     let openCoverExe = lazy ((getNugetPackage "OpenCover" "4.6.519") @@ "tools" @@ "OpenCover.Console.exe")
     let coverallsExe = lazy ((getNugetPackage "coveralls.io" "1.3.4") @@ "tools" @@ "coveralls.net.exe")
     let coverityExe = lazy ("C:/CoverityScan/win64/bin/cov-build.exe") // TODO: install coverity scan if absent
@@ -27,7 +28,8 @@ module Test =
         |> Seq.map (fun i -> let _, p = i in p)
         |> Seq.where (fun p -> p.Contains ".Tests.")
         |> Seq.map (fun p -> Path.GetDirectoryName(p) @@ "bin" @@ solution.Configuration @@ Path.GetFileNameWithoutExtension(p) + ".dll")
-        |> List.ofSeq 
+        |> Seq.map (fun p -> if File.Exists(p) then p else ((!!(Path.GetDirectoryName(p) @@ "*.Tests.Dll")) |> Seq.head))
+        |> List.ofSeq
 
     // test and publish result to appveyor
     let testSolution solution = 
@@ -65,7 +67,7 @@ module Test =
             let ppath = Path.GetDirectoryName(List.head testDlls)
             let testRunnerExePath, testArgs = 
                 if File.Exists(ppath @@ "xunit.core.dll") then (xunitRunnerExe.Force(), "-noshadow")
-                elif File.Exists(ppath @@ "nunit.framework.dll") then (nunitRunnerExe.Force(), "/noshadow")
+                elif File.Exists(ppath @@ "nunit.framework.dll") then (nunitRunnerExe.Force(), "")
                 else failwithf "Failed to test project because test framework cannot be determined."
             testDlls
             |> String.concat " "
@@ -75,7 +77,7 @@ module Test =
                                        TestRunnerExePath = testRunnerExePath
                                        Output = testDir @@ "coverage.xml"
                                        Register = RegisterUser
-                                       Filter = "+[*]* -[*.Tests]* -[xunit*]*" }) (dlls + " " + testArgs))
+                                       Filter = "+[*]* -[*.Tests]* -[xunit*]* -[NUnit*]*" }) (dlls + " " + testArgs))
             if getBuildParam "coverallskey" <> "" then 
                 // disable printing args to keep coverallskey secret
                 ProcessHelper.enableProcessTracing <- false
