@@ -9,17 +9,23 @@ module Test =
     open System.IO
     open Fake
     open Fake.Testing.XUnit2
+    open Fake.Testing.NUnit3
     open Fake.AppVeyor
     open Fake.OpenCoverHelper
 
     // tools
     let xunitRunnerExe = lazy ((getNugetPackage "xunit.runner.console" "2.1.0") @@ "tools" @@ "xunit.console.exe")
+    let nunitRunnerExe = lazy ((getNugetPackage "NUnit.Runners" "3.2.0") @@ "tools" @@ "nunit3-console.exe")
     let openCoverExe = lazy ((getNugetPackage "OpenCover" "4.6.519") @@ "tools" @@ "OpenCover.Console.exe")
     let coverallsExe = lazy ((getNugetPackage "coveralls.io" "1.3.4") @@ "tools" @@ "coveralls.net.exe")
     let coverityExe = lazy ("C:/CoverityScan/win64/bin/cov-build.exe") // TODO: install coverity scan if absent
     let coverityPublishExe  = lazy ((getNugetPackage "PublishCoverity" "0.11.0") @@ "tools" @@ "PublishCoverity.exe")
 
-    // test and publish result to appveyor
+    let getTestProjects solution =
+        // Project("{~}") = "Name", "Path.csproj", "{~}"
+        [ "TODO" ]
+
+    // test with xunit2 and publish result to appveyor
     let testSolution solution = 
         ensureDirectory testDir
         solution.Projects
@@ -30,6 +36,19 @@ module Test =
                { p with ToolPath = xunitRunnerExe.Force()
                         ShadowCopy = false
                         XmlOutputPath = Some(testDir @@ "test.xml") })
+        if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then UploadTestResultsFile Xunit (testDir @@ "test.xml")
+
+    // test with NUnit3 and publish result to appveyor
+    let testSolutionWithNUnit3 solution = 
+        ensureDirectory testDir
+        solution.Projects
+        |> List.map 
+               (fun project -> (project.Folder + ".Tests") @@ "bin" @@ solution.Configuration @@ (Path.GetFileName(project.Folder) + ".Tests.dll"))
+        |> List.filter (fun path -> File.Exists(path))
+        |> Fake.Testing.NUnit3.NUnit3 (fun p ->
+               { p with ToolPath = nunitRunnerExe.Force()
+                        ShadowCopy = false
+                        ResultSpecs = [ testDir @@ "test.xml" ] })
         if not (String.IsNullOrEmpty AppVeyorEnvironment.JobId) then UploadTestResultsFile Xunit (testDir @@ "test.xml")
 
     // test with opencover and publish result to coveralls.io
