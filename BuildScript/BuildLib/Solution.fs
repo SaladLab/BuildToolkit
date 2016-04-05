@@ -20,4 +20,3 @@ module Solution =
         Regex.Matches(s, @"Project(.*) = (.*), (.*), (.*)")
         |> Seq.cast
         |> Seq.map (fun (m : Match) -> (m.Groups.[2].Value.Trim('"'), m.Groups.[3].Value.Trim('"')))
-
