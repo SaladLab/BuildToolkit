@@ -13,7 +13,7 @@ module Nuget =
         
             // copy each target platform outputs
             let targets = 
-                [ ("", "net45")
+                [ ("", project.DefaultTarget)
                   (".Net20", "net20")
                   (".Net35", "net35")
                   (".Net40", "net40") ]

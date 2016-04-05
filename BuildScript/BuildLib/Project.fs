@@ -14,6 +14,7 @@ module Project =
           AssemblyVersion : string
           PackageVersion : string
           Releases : ReleaseNotes list
+          DefaultTarget : string
           Dependencies : (string * string) list }
     
     let emptyProject = 
@@ -24,6 +25,7 @@ module Project =
           AssemblyVersion = ""
           PackageVersion = ""
           Releases = []
+          DefaultTarget = "net45"
           Dependencies = [] }
     
     let decoratePrerelease v = 
@@ -55,4 +57,3 @@ module Project =
                                    | Some(_, ver) -> ver
                                    | None -> ((project projects id).PackageVersion))
                               | (id, ver) -> (id, ver))
-
