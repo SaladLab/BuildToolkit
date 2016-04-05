@@ -76,8 +76,10 @@ def rule():
                 pgroup_base = [e for e in proj if e.tag == "PropertyGroup" and len(e.keys()) == 0][0]
                 pgroup_rel = [e for e in proj if e.tag == "PropertyGroup" and e.get("Condition") != None and e.get("Condition").find("Release") != -1][0]
                 ruleset_relpath = os.path.relpath(dst_path, root) + "\CodeAnalysis.ruleset"
-                add_element(pgroup_base, etree.XML('<CodeAnalysisRuleSet>' + ruleset_relpath + '</CodeAnalysisRuleSet>'))
-                add_element(pgroup_rel, etree.XML('<RunCodeAnalysis>true</RunCodeAnalysis>'))
+                if pgroup_base.find("CodeAnalysisRuleSet") is None:
+                    add_element(pgroup_base, etree.XML('<CodeAnalysisRuleSet>' + ruleset_relpath + '</CodeAnalysisRuleSet>'))
+                if pgroup_rel.find("RunCodeAnalysis") is None:
+                    add_element(pgroup_rel, etree.XML('<RunCodeAnalysis>true</RunCodeAnalysis>'))
                 save_proj(path, proj)
             except Exception as e:
                 print "!", e
