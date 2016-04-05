@@ -28,7 +28,7 @@ module Test =
         |> Seq.map (fun i -> let _, p = i in p)
         |> Seq.where (fun p -> (Path.GetFileNameWithoutExtension p).EndsWith ".Tests")
         |> Seq.map (fun p -> Path.GetDirectoryName(p) @@ "bin" @@ solution.Configuration @@ Path.GetFileNameWithoutExtension(p) + ".dll")
-        |> Seq.map (fun p -> if File.Exists(p) then p else ((!!(Path.GetDirectoryName(p) @@ "*.Tests.Dll")) |> Seq.head))
+        |> Seq.map (fun p -> if File.Exists(p) then p else ((!!(Path.GetDirectoryName(p) @@ "*.Tests.dll")) |> Seq.head))
         |> List.ofSeq
 
     // test and publish result to appveyor

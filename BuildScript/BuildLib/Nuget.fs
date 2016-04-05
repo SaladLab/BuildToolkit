@@ -16,7 +16,8 @@ module Nuget =
                 [ ("", project.DefaultTarget)
                   (".Net20", "net20")
                   (".Net35", "net35")
-                  (".Net40", "net40") ]
+                  (".Net40", "net40")
+                  (".Net45", "net45") ]
             targets |> List.iter (fun (postfix, target) -> 
                            let dllFileNameNet = (project.Folder + postfix) @@ "bin/Release" @@ project.Name
                            let dllFilesNet = (!!(dllFileNameNet + ".dll") ++ (dllFileNameNet + ".pdb") ++ (dllFileNameNet + ".xml"))
