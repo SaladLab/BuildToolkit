@@ -129,8 +129,6 @@ def main():
     else:
         print "Wrong command: " + cmd
         sys.exit(1)
-    
-    print get_buildtoolkit_path()
 
 
 if __name__ == "__main__":
