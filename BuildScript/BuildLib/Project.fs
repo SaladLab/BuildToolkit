@@ -13,6 +13,7 @@ module Project =
           Executable : bool
           AssemblyVersion : string
           PackageVersion : string
+          PackagePrerelease : string
           Releases : ReleaseNotes list
           DefaultTarget : string
           Dependencies : (string * string) list }
@@ -24,6 +25,7 @@ module Project =
           Executable = false
           AssemblyVersion = ""
           PackageVersion = ""
+          PackagePrerelease = ""
           Releases = []
           DefaultTarget = "net45"
           Dependencies = [] }
@@ -32,18 +34,19 @@ module Project =
         let couldParse, parsedInt = System.Int32.TryParse(v)
         if couldParse then "build" + (sprintf "%04d" parsedInt)
         else v
-    
-    let decoratePackageVersion v = 
-        if hasBuildParam "nugetprerelease" then v + "-" + decoratePrerelease ((getBuildParam "nugetprerelease"))
+
+    let decoratePackageVersion v prerelease = 
+        if hasBuildParam "nugetprerelease" then v + "-" + (decoratePrerelease (getBuildParam "nugetprerelease"))
+        elif prerelease <> "" then v + "-" + (decoratePrerelease prerelease)
         else v
-    
+
     let initProjects = 
         List.map (fun p -> 
             let parsedReleases = 
                 File.ReadLines(p.Folder @@ (p.Name + ".Release.md")) |> ReleaseNotesHelper.parseAllReleaseNotes
             let latest = List.head parsedReleases
             { p with AssemblyVersion = latest.AssemblyVersion
-                     PackageVersion = decoratePackageVersion (latest.AssemblyVersion)
+                     PackageVersion = (decoratePackageVersion latest.AssemblyVersion p.PackagePrerelease)
                      Releases = parsedReleases })
     
     let project projects name = List.filter (fun p -> p.Name = name) projects |> List.head
