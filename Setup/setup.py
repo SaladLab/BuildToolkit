@@ -63,8 +63,8 @@ def add_element(element, child):
     list(element)[-1].tail += "  "
     child.tail = element.text[0: -2]
     element.append(child)
-    
-    
+
+
 def rule():
     dst_path = sys.argv[2]
     for root, dirnames, filenames in os.walk(dst_path):
