@@ -104,7 +104,7 @@ module Test =
         CleanDir "./cov-int"
         let result = ExecProcess (fun info ->
             info.FileName <- coverityExe.Force()
-            info.Arguments <- "--dir cov-int \"" + msBuildExe + "\" /t:Rebuild /p:UseSharedCompilation=false") TimeSpan.MaxValue
+            info.Arguments <- "--dir cov-int \"" + msBuildExe + "\" " + solution.SolutionFile + " /t:Rebuild /p:UseSharedCompilation=false") TimeSpan.MaxValue
         if result <> 0 then failwithf "Failed to run coverity"
 
         // zip result
