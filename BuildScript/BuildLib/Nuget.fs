@@ -19,7 +19,7 @@ module Nuget =
                   (".Net40", "net40")
                   (".Net45", "net45") ]
             targets |> List.iter (fun (postfix, target) -> 
-                           let dllFileNameNet = (project.Folder + postfix) @@ "bin/Release" @@ project.Name
+                           let dllFileNameNet = (project.Folder + postfix) @@ "bin" @@ solution.Configuration @@ project.Name
                            let dllFilesNet = (!!(dllFileNameNet + ".dll") ++ (dllFileNameNet + ".pdb") ++ (dllFileNameNet + ".xml"))
                            if (Seq.length dllFilesNet > 0) then (dllFilesNet |> CopyFiles(workDir @@ "lib" @@ target)))
             // copy sources files
