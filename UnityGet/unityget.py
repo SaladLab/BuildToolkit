@@ -7,6 +7,7 @@ import sys
 import tarfile
 import urllib2
 import json
+import codecs
 import re
 import tempfile
 import argparse
@@ -34,7 +35,7 @@ def parse_semver(str):
 
 def parse_semver_for_key(str):
     x = parse_semver(str)
-    return (x["major"], x["minor"], x["patch"], x["prerelease"] or "\xff")
+    return (int(x["major"]), int(x["minor"]), int(x["patch"]), x["prerelease"] or "\xff")
 
 
 def get_github_releases(id):
@@ -55,7 +56,7 @@ def get_package_rootpath():
 def download_github_releases(id, ver, force=False, verbose=False):
     # get release information for package
     d = get_github_releases(id)
-    if ver is None:
+    if ver is None or ver == "" or ver == "latest":
         ver = max(d.keys(), key=parse_semver_for_key)
         if verbose:
             print "detect version:", ver
@@ -85,7 +86,6 @@ def download_github_releases(id, ver, force=False, verbose=False):
 
 
 # this function is based on https://github.com/gered/extractunitypackage/blob/master/extractunitypackage.py
-
 def extract_unitypackage(package, target, filter=None, verbose=False):
     # extract .unitypackage contents to a temporary directory
     tempDir = tempfile.mkdtemp()
@@ -159,37 +159,61 @@ def extract_unitypackage(package, target, filter=None, verbose=False):
     shutil.rmtree(tempDir)
 
 
-def make_filter(args):
-    if args.nosample:
-        if args.include or args.exclude:
-            raise Exception("nosample cannot used with include or exclude")
+def make_filter(nosample, includes, excludes):
+    if nosample:
+        if includes or excludes:
+            raise Exception("nosample cannot used with includes or excludes")
         return lambda p: os.path.split(p)[0].lower().find("sample") == -1
 
-    if args.include:
-        if args.exclude:
-            raise Exception("include cannot used with exclude")
-        return lambda p: any(re.match(pattern, p) for pattern in args.include)
+    if includes:
+        if excludes:
+            raise Exception("includes cannot used with excludes")
+        return lambda p: any(re.match(pattern, p) for pattern in includes)
 
-    if args.exclude:
-        if args.include:
-            raise Exception("exclude cannot used with include")
-        print args.exclude
-        return lambda p: all((re.match(pattern, p) is None) for pattern in args.exclude)
+    if excludes:
+        if includes:
+            raise Exception("excludes cannot used with includes")
+        print excludes
+        return lambda p: all((re.match(pattern, p) is None) for pattern in excludes)
 
     return None
 
 
-def run(args):
-    print
-    print "* download package: {0}(version={1})".format(args.id, args.version or "latest")
-    print
-    package = download_github_releases(args.id, args.version, verbose=True)
+def install_package(id, version, target, nosample=None, includes=None, excludes=None, verbose=False):
+    print "* download package: {0}(version={1})".format(id, version or "latest")
+    package = download_github_releases(id, version, verbose=verbose)
     print "saved: {0}".format(package)
 
-    print
-    print "* install package to {0}".format(args.target)
-    print
-    extract_unitypackage(package, args.target, make_filter(args), verbose=True)
+    print "* install package to {0}".format(target)
+    extract_unitypackage(package, target, make_filter(nosample, includes, excludes), verbose=verbose)
+
+
+def run_for_package(args):
+    install_package(args.id, args.version, args.nosample, args.include, args.exclude, verbose=True)
+
+
+def run_for_package_config(args):
+    j = json.load(codecs.open(args.id))
+    if "dependencies" not in j:
+        print "No dependencies"
+        return
+    target = os.path.split(args.id)[0]
+    for id, body in j["dependencies"].iteritems():
+        if isinstance(body, str) or isinstance(body, unicode):
+            install_package(id, body, target, verbose=True)
+        else:
+            ver = body.get("version", None)
+            nosample = body.get("nosample", False)
+            includes = body.get("includes", None)
+            excludes = body.get("excludes", None)
+            install_package(id, ver, target, nosample, includes, excludes, verbose=True)
+
+
+def run(args):
+    if args.packageconfig:
+        run_for_package_config(args)
+    else:
+        run_for_package(args)
 
     print
     print "done"
@@ -204,10 +228,10 @@ def main():
     parser.add_argument("--nosample", action='store_true', help="Exclude all files in sample directories")
     parser.add_argument("--include", action='append', help="Regular expression filter to include files")
     parser.add_argument("--exclude", action='append', help="Regular expression filter to exclude files")
-    parser.add_argument("--packagefile", action='store_true', help="Use package file")
+    parser.add_argument("--packageconfig", action='store_true', help="Use package config file")
 
     # example: "SaladLab/Unity3D.UiManager --include .*Sample.* --include .*Handle.*".split()
-    # example: "./TestUnityProject/unityget.packages.config --packagefile
+    # example: "unitypackage.test.json --packageconfig".split()
     run(parser.parse_args())
 
 
