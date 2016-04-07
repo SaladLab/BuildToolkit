@@ -198,14 +198,16 @@ def run(args):
 def main():
     print "UnityGet 0.1"
     parser = argparse.ArgumentParser()
-    parser.add_argument("id", help="Package ID. (owner/package format like SaladLab/Unity3D.UiManager)")
+    parser.add_argument("id", help="Package ID (like SaladLab/Unity3D.UiManager) or Package File.")
     parser.add_argument("--version", help="Package version to install. (default: latest)")
     parser.add_argument("--target", default = "./")
     parser.add_argument("--nosample", action='store_true', help="Exclude all files in sample directories")
     parser.add_argument("--include", action='append', help="Regular expression filter to include files")
     parser.add_argument("--exclude", action='append', help="Regular expression filter to exclude files")
+    parser.add_argument("--packagefile", action='store_true', help="Use package file")
 
     # example: "SaladLab/Unity3D.UiManager --include .*Sample.* --include .*Handle.*".split()
+    # example: "./TestUnityProject/unityget.packages.config --packagefile
     run(parser.parse_args())
 
 
