@@ -22,6 +22,7 @@ module Nuget =
                            let dllFileNameNet = (project.Folder + postfix) @@ "bin" @@ solution.Configuration @@ project.Name
                            let dllFilesNet = (!!(dllFileNameNet + ".dll") ++ (dllFileNameNet + ".pdb") ++ (dllFileNameNet + ".xml"))
                            if (Seq.length dllFilesNet > 0) then (dllFilesNet |> CopyFiles(workDir @@ "lib" @@ target)))
+
             // copy sources files
             let isAssemblyInfo f = (filename f).Contains("AssemblyInfo")
             let isSrc f = (hasExt ".cs" f) && not (isAssemblyInfo f)
