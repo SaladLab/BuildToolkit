@@ -8,3 +8,4 @@ module Settings =
     let testDir = binDir @@ "test"
     let nugetDir = binDir @@ "nuget"
     let nugetWorkDir = nugetDir @@ "work"
+    let unityDir = binDir @@ "unity"

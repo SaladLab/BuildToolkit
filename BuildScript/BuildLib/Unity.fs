@@ -7,7 +7,7 @@ module Unity =
     open System.IO
     
     let unityExe = lazy ("C:/Program Files/Unity/Editor/Unity.exe") // TODO: discovery
-    let uniGet = lazy ((getNugetPackage "UniGet" "0.1.1") @@ "tools" @@ "UniGet.exe")
+    let uniGet = lazy ((getNugetPackage "UniGet" "0.2.0") @@ "tools" @@ "UniGet.exe")
 
     let unity projectPath args = 
         let result = 
@@ -21,7 +21,8 @@ module Unity =
         let updateDllFile = path @@ "UpdateDll.bat"
         if File.Exists(updateDllFile) then (Shell.Exec(updateDllFile) |> ignore)
         unity (Path.GetFullPath path) "-executeMethod PackageBuilder.BuildPackage"
-        (!!(path @@ "*.unitypackage") |> Seq.iter (fun p -> MoveFile binDir p))
+        ensureDirectory unityDir
+        (!!(path @@ "*.unitypackage") |> Seq.iter (fun p -> MoveFile unityDir p))
 
     let restoreUnityPackage path =
         let result = ExecProcess (fun info ->
@@ -30,7 +31,8 @@ module Unity =
         if result <> 0 then failwithf "Failed to run uniget"
 
     let packUnityPackage path =
+        ensureDirectory unityDir
         let result = ExecProcess (fun info ->
             info.FileName <- uniGet.Force()
-            info.Arguments <- "pack \"" + path + "\" --output \"" + binDir + "\"") TimeSpan.MaxValue
+            info.Arguments <- "pack \"" + path + "\" --output \"" + unityDir + "\"") TimeSpan.MaxValue
         if result <> 0 then failwithf "Failed to run uniget"
