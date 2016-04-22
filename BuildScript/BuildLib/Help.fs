@@ -10,11 +10,11 @@ module Help =
         | "clean" -> 
             ("Clean", "")
         | "assemblyinfo" -> 
-            ("Generate AssemblyInfoGenerated.cs for all projects","")
+            ("Generate AssemblyInfoGenerated.cs for all projects", "")
         | "restore" ->
             ("Restore solution nuget packages", "")
         | "build" -> 
-            ("Build solution",  "")
+            ("Build solution", "")
         | "test" -> 
             ("Test solution", "")
         | "cover" -> 
@@ -23,14 +23,18 @@ module Help =
         | "coverity" -> 
             ("Gater coverity by build and publish it",
              "[coveritytoken={TOKEN}] [coverityemail={EMAIL}]")
-        | "nuget" -> 
-            ("Create and publish nuget packages", "")
-        | "createnuget" -> 
+        | "packnuget" -> 
             ("Create nuget packages", 
              "[nugetprerelease={VERSION_PRERELEASE}]")
+        | "packunity" -> 
+            ("Create unity3d packages", "") 
+        | "pack" -> 
+            ("Pack all packages", "")
         | "publishnuget" -> 
             ("Publish nuget packages",
              "[nugetkey={API_KEY}] [nugetpublishurl={PUBLISH_URL}] [forcepublish=1]")
+        | "publish" -> 
+            ("Publish all packages", "[publishonly=1]")
         | "ci" -> 
             ("Build, Test and Publish", "")
         | "help" -> 
