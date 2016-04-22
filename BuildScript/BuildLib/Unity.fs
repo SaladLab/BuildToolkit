@@ -7,7 +7,7 @@ module Unity =
     open System.IO
     
     let unityExe = lazy ("C:/Program Files/Unity/Editor/Unity.exe") // TODO: discovery
-    let uniGet = lazy ((getNugetPackage "UniGet" "0.2.0") @@ "tools" @@ "UniGet.exe")
+    let uniGet = lazy ((getNugetPackage "UniGet" "0.2.1") @@ "tools" @@ "UniGet.exe")
 
     let unity projectPath args = 
         let result = 
@@ -34,5 +34,5 @@ module Unity =
         ensureDirectory unityDir
         let result = ExecProcess (fun info ->
             info.FileName <- uniGet.Force()
-            info.Arguments <- "pack \"" + path + "\" --output \"" + unityDir + "\"") TimeSpan.MaxValue
+            info.Arguments <- "pack \"" + path + "\" --output \"" + unityDir + "\" --local \"" + unityDir + "\"") TimeSpan.MaxValue
         if result <> 0 then failwithf "Failed to run uniget"
