@@ -55,7 +55,7 @@ module Nuget =
                              OutputPath = nugetDir
                              WorkingDir = nugetDir
                              AccessKey = getBuildParamOrDefault "nugetkey" ""
-                             PublishUrl = getBuildParamOrDefault "nugetpublishurl" ""
+                             PublishUrl = getBuildParamOrDefault "nugetpublishurl" "nuget.org"
                              Version = project.PackageVersion })
             with e -> 
                 if getBuildParam "forcepublish" = "" then 
