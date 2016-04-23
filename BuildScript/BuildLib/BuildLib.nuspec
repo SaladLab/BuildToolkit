@@ -14,7 +14,7 @@
     <copyright>Copyright © 2016 SaladLab</copyright>
     <tags>build fake f# saladlab</tags>
     <dependencies>
-      <dependency id="FAKE.Lib" version="4.23.0" />
+      <dependency id="FAKE.Lib" version="4.25.4" />
     </dependencies>
   </metadata>
   <files>
