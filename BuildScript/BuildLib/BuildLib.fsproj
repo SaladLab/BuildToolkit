@@ -51,7 +51,6 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Content Include="packages.config" />
     <None Include="BuildLib.nuspec" />
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Project.fs" />
@@ -63,10 +62,11 @@
     <Compile Include="Nuget.fs" />
     <Compile Include="Unity.fs" />
     <Compile Include="Help.fs" />
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FakeLib">
-      <HintPath>packages\FAKE.Lib.4.23.0\lib\net451\FakeLib.dll</HintPath>
+      <HintPath>packages\FAKE.Lib.4.25.4\lib\net451\FakeLib.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
