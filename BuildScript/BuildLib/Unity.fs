@@ -7,7 +7,7 @@ module Unity =
     open System.IO
     
     let unityExe = lazy ("C:/Program Files/Unity/Editor/Unity.exe") // TODO: discovery
-    let uniGet = lazy ((getNugetPackage "UniGet" "0.2.3") @@ "tools" @@ "UniGet.exe")
+    let uniGet = lazy ((getNugetPackage "UniGet" "0.2.4") @@ "tools" @@ "UniGet.exe")
 
     let unity projectPath args = 
         let result = 
