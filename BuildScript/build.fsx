@@ -56,6 +56,6 @@ let isPublishOnly = getBuildParam "publishonly"
 
 "Test" ==> "CI"
 "Cover" ==> "CI"
-"Nuget" ==> "CI"
+"Publish" ==> "CI"
 
 RunTargetOrDefault "Help"
