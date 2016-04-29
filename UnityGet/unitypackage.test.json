@@ -1,5 +1,0 @@
-{
-  "dependencies": {
-    "SaladLab/Unity3D.UiManager": { "version": "latest", "nosample": true }
-  }
-}
