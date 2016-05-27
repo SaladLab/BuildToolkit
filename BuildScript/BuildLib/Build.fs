@@ -6,17 +6,20 @@ module Build =
     open Fake.AssemblyInfoFile
     
     let cleanBin = CleanDirs [ binDir ]
-    
-    let generateAssemblyInfo solution = 
+
+    let generateAssemblyInfoWithVersion solution getVersion = 
         solution.Projects
         |> List.filter (fun p -> not p.Template)
         |> List.iter 
                (fun p -> 
                CreateCSharpAssemblyInfo (p.Folder @@ "Properties" @@ "AssemblyInfoGenerated.cs") 
-                   [ Attribute.Version((SemVerHelper.parse p.AssemblyVersion).Major.ToString() + ".0.0")
+                   [ Attribute.Version (getVersion p)
                      Attribute.FileVersion p.AssemblyVersion
                      Attribute.InformationalVersion p.PackageVersion ])
-    
+
+    let generateAssemblyInfo solution =
+        generateAssemblyInfoWithVersion solution (fun p -> (SemVerHelper.parse p.AssemblyVersion).Major.ToString() + ".0.0")
+
     let restoreNugetPackages solution = 
         solution.SolutionFile |> RestoreMSSolutionPackages(fun p -> 
                                      { p with OutputPath = "./packages"
