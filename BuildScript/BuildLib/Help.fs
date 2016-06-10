@@ -37,6 +37,8 @@ module Help =
             ("Publish all packages", "[publishonly=1]")
         | "ci" -> 
             ("Build, Test and Publish", "")
+        | "devlink" -> 
+            ("Link Development DLLs", "[revert=1]")
         | "help" -> 
             ("Show usages", "")
         | _ -> 
