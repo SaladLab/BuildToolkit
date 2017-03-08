@@ -12,7 +12,7 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyConfiguration("")>]
 [<assembly: AssemblyCompany("SaladLab")>]
 [<assembly: AssemblyProduct("BuildLib")>]
-[<assembly: AssemblyCopyright("Copyright © 2016 SaladLab")>]
+[<assembly: AssemblyCopyright("Copyright © 2017 SaladLab")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 
@@ -33,8 +33,8 @@ open System.Runtime.InteropServices
 // 
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
-[<assembly: AssemblyVersion("0.3.6.0")>]
-[<assembly: AssemblyFileVersion("0.3.6.0")>]
+[<assembly: AssemblyVersion("0.3.7.0")>]
+[<assembly: AssemblyFileVersion("0.3.7.0")>]
 
 do
     ()

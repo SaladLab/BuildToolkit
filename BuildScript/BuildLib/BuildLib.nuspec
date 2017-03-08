@@ -3,7 +3,7 @@
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>FAKE.BuildLib</id>
     <title>FAKE.BuildLib</title>
-    <version>0.3.6</version>
+    <version>0.3.7</version>
     <authors>Esun Kim</authors>
     <owners>Esun Kim</owners>
     <description>Helper library for FAKE build script</description>
@@ -11,10 +11,10 @@
     <projectUrl>https://github.com/SaladLab/BuildToolkit/tree/master/BuildScript</projectUrl>
     <iconUrl>https://raw.githubusercontent.com/fsharp/FAKE/master/help/pics/logo.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <copyright>Copyright © 2016 SaladLab</copyright>
+    <copyright>Copyright © 2017 SaladLab</copyright>
     <tags>build fake f# saladlab</tags>
     <dependencies>
-      <dependency id="FAKE.Lib" version="4.28.0" />
+      <dependency id="FAKE.Lib" version="4.52.0" />
     </dependencies>
   </metadata>
   <files>
